@@ -30,7 +30,7 @@ Before even extracting the files, we need to extract the backup encryption keys 
 This should decompress the filesystem into `./squashfs-root`.
 4. Extract the encryption keys from the Lua bytecode. Going off the previous steps:
 `strings squashfs-root/usr/lib/lua/luci/model/crypto.lua`. This should output a sizeable list of strings. What you're looking for is two hexadecimal strings. One of them (the key) should be significantly longer than any other string in the list. The other one (IV) is right after the key.
-5. Copy `.encryption_params.sample` into `encryption_params`. Paste the key and the IV you found into the appropriate places.
+5. Copy `.encryption_params.sample` into `.encryption_params`. Paste the key and the IV you found into the appropriate places in `.encryption_params`.
 
 ##### Modification
 You should download the backup file from the router (the page to do so should be in System Tools -> Backup and Restore). These instructions will assume that you have the backup in this directory that the tools are in with a name of `backup.bin`.
