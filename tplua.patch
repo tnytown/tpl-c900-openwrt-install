@@ -1,0 +1,348 @@
+--- a/src/ltm.c	2019-03-17 13:21:23.762536099 -0500
++++ b/src/ltm.c	2016-12-26 20:20:39.000000000 -0600
+@@ -28,11 +28,11 @@
+ 
+ void luaT_init (lua_State *L) {
+   static const char *const luaT_eventname[] = {  /* ORDER TM */
+-    "__index", "__newindex",
+-    "__gc", "__mode", "__eq",
+-    "__add", "__sub", "__mul", "__div", "__mod",
+-    "__pow", "__unm", "__len", "__lt", "__le",
+-    "__concat", "__call"
++    "__mode", "__newindex",
++    "__index", "__gc", "__eq",
++    "__div", "__mul", "__mod", "__pow", "__le",
++    "__lt", "__unm", "__len", "__sub", "__add",
++    "__call", "__concat"
+   };
+   int i;
+   for (i=0; i<TM_N; i++) {
+--- a/src/lopcodes.h	2019-03-17 13:19:41.483090194 -0500
++++ b/src/lopcodes.h	2016-12-26 20:20:39.000000000 -0600
+@@ -151,14 +151,8 @@
+ /*----------------------------------------------------------------------
+ name		args	description
+ ------------------------------------------------------------------------*/
+-OP_MOVE,/*	A B	R(A) := R(B)					*/
+-OP_LOADK,/*	A Bx	R(A) := Kst(Bx)					*/
+-OP_LOADBOOL,/*	A B C	R(A) := (Bool)B; if (C) pc++			*/
+-OP_LOADNIL,/*	A B	R(A) := ... := R(B) := nil			*/
+-OP_GETUPVAL,/*	A B	R(A) := UpValue[B]				*/
+-
+-OP_GETGLOBAL,/*	A Bx	R(A) := Gbl[Kst(Bx)]				*/
+ OP_GETTABLE,/*	A B C	R(A) := R(B)[RK(C)]				*/
++OP_GETGLOBAL,/*	A Bx	R(A) := Gbl[Kst(Bx)]				*/
+ 
+ OP_SETGLOBAL,/*	A Bx	Gbl[Kst(Bx)] := R(A)				*/
+ OP_SETUPVAL,/*	A B	UpValue[B] := R(A)				*/
+@@ -168,10 +162,19 @@
+ 
+ OP_SELF,/*	A B C	R(A+1) := R(B); R(A) := R(B)[RK(C)]		*/
+ 
+-OP_ADD,/*	A B C	R(A) := RK(B) + RK(C)				*/
+-OP_SUB,/*	A B C	R(A) := RK(B) - RK(C)				*/
+-OP_MUL,/*	A B C	R(A) := RK(B) * RK(C)				*/
++OP_LOADNIL,/*	A B	R(A) := ... := R(B) := nil			*/
++OP_LOADK,/*	A Bx	R(A) := Kst(Bx)					*/
++OP_LOADBOOL,/*	A B C	R(A) := (Bool)B; if (C) pc++			*/
++OP_GETUPVAL,/*	A B	R(A) := UpValue[B]				*/
++
++OP_LT,/*	A B C	if ((RK(B) <  RK(C)) ~= A) then pc++  		*/
++OP_LE,/*	A B C	if ((RK(B) <= RK(C)) ~= A) then pc++  		*/
++OP_EQ,/*	A B C	if ((RK(B) == RK(C)) ~= A) then pc++		*/
++
+ OP_DIV,/*	A B C	R(A) := RK(B) / RK(C)				*/
++OP_MUL,/*	A B C	R(A) := RK(B) * RK(C)				*/
++OP_SUB,/*	A B C	R(A) := RK(B) - RK(C)				*/
++OP_ADD,/*	A B C	R(A) := RK(B) + RK(C)				*/
+ OP_MOD,/*	A B C	R(A) := RK(B) % RK(C)				*/
+ OP_POW,/*	A B C	R(A) := RK(B) ^ RK(C)				*/
+ OP_UNM,/*	A B	R(A) := -R(B)					*/
+@@ -182,16 +185,9 @@
+ 
+ OP_JMP,/*	sBx	pc+=sBx					*/
+ 
+-OP_EQ,/*	A B C	if ((RK(B) == RK(C)) ~= A) then pc++		*/
+-OP_LT,/*	A B C	if ((RK(B) <  RK(C)) ~= A) then pc++  		*/
+-OP_LE,/*	A B C	if ((RK(B) <= RK(C)) ~= A) then pc++  		*/
+-
+ OP_TEST,/*	A C	if not (R(A) <=> C) then pc++			*/ 
+ OP_TESTSET,/*	A B C	if (R(B) <=> C) then R(A) := R(B) else pc++	*/ 
+-
+-OP_CALL,/*	A B C	R(A), ... ,R(A+C-2) := R(A)(R(A+1), ... ,R(A+B-1)) */
+-OP_TAILCALL,/*	A B C	return R(A)(R(A+1), ... ,R(A+B-1))		*/
+-OP_RETURN,/*	A B	return R(A), ... ,R(A+B-2)	(see note)	*/
++OP_MOVE,/*	A B	R(A) := R(B)					*/
+ 
+ OP_FORLOOP,/*	A sBx	R(A)+=R(A+2);
+ 			if R(A) <?= R(A+1) then { pc+=sBx; R(A+3)=R(A) }*/
+@@ -204,6 +200,10 @@
+ OP_CLOSE,/*	A 	close all variables in the stack up to (>=) R(A)*/
+ OP_CLOSURE,/*	A Bx	R(A) := closure(KPROTO[Bx], R(A), ... ,R(A+n))	*/
+ 
++OP_CALL,/*	A B C	R(A), ... ,R(A+C-2) := R(A)(R(A+1), ... ,R(A+B-1)) */
++OP_RETURN,/*	A B	return R(A), ... ,R(A+B-2)	(see note)	*/
++OP_TAILCALL,/*	A B C	return R(A)(R(A+1), ... ,R(A+B-1))		*/
++
+ OP_VARARG/*	A B	R(A), R(A+1), ..., R(A+B-1) = vararg		*/
+ } OpCode;
+ 
+@@ -243,8 +243,8 @@
+ */  
+ 
+ enum OpArgMask {
+-  OpArgN,  /* argument is not used */
+   OpArgU,  /* argument is used */
++  OpArgN,  /* argument is not used */
+   OpArgR,  /* argument is a register or a jump offset */
+   OpArgK   /* argument is a constant or register/constant */
+ };
+--- a/src/lopcodes.c	2019-03-17 13:19:41.483090194 -0500
++++ b/src/lopcodes.c	2016-12-26 20:20:39.000000000 -0600
+@@ -14,22 +14,24 @@
+ /* ORDER OP */
+ 
+ const char *const luaP_opnames[NUM_OPCODES+1] = {
+-  "MOVE",
+-  "LOADK",
+-  "LOADBOOL",
+-  "LOADNIL",
+-  "GETUPVAL",
+-  "GETGLOBAL",
+   "GETTABLE",
++  "GETGLOBAL",
+   "SETGLOBAL",
+   "SETUPVAL",
+   "SETTABLE",
+   "NEWTABLE",
+   "SELF",
+-  "ADD",
+-  "SUB",
+-  "MUL",
++  "LOADNIL",
++  "LOADK",
++  "LOADBOOL",
++  "GETUPVAL",
++  "LT",
++  "LE",
++  "EQ",
+   "DIV",
++  "MUL",
++  "SUB",
++  "ADD",
+   "MOD",
+   "POW",
+   "UNM",
+@@ -37,20 +39,18 @@
+   "LEN",
+   "CONCAT",
+   "JMP",
+-  "EQ",
+-  "LT",
+-  "LE",
+   "TEST",
+   "TESTSET",
+-  "CALL",
+-  "TAILCALL",
+-  "RETURN",
++  "MOVE",
+   "FORLOOP",
+   "FORPREP",
+   "TFORLOOP",
+   "SETLIST",
+   "CLOSE",
+   "CLOSURE",
++  "CALL",
++  "RETURN",
++  "TAILCALL",
+   "VARARG",
+   NULL
+ };
+@@ -60,22 +60,24 @@
+ 
+ const lu_byte luaP_opmodes[NUM_OPCODES] = {
+ /*       T  A    B       C     mode		   opcode	*/
+-  opmode(0, 1, OpArgR, OpArgN, iABC) 		/* OP_MOVE */
+- ,opmode(0, 1, OpArgK, OpArgN, iABx)		/* OP_LOADK */
+- ,opmode(0, 1, OpArgU, OpArgU, iABC)		/* OP_LOADBOOL */
+- ,opmode(0, 1, OpArgR, OpArgN, iABC)		/* OP_LOADNIL */
+- ,opmode(0, 1, OpArgU, OpArgN, iABC)		/* OP_GETUPVAL */
++  opmode(0, 1, OpArgR, OpArgK, iABC)		/* OP_GETTABLE */
+  ,opmode(0, 1, OpArgK, OpArgN, iABx)		/* OP_GETGLOBAL */
+- ,opmode(0, 1, OpArgR, OpArgK, iABC)		/* OP_GETTABLE */
+  ,opmode(0, 0, OpArgK, OpArgN, iABx)		/* OP_SETGLOBAL */
+  ,opmode(0, 0, OpArgU, OpArgN, iABC)		/* OP_SETUPVAL */
+  ,opmode(0, 0, OpArgK, OpArgK, iABC)		/* OP_SETTABLE */
+  ,opmode(0, 1, OpArgU, OpArgU, iABC)		/* OP_NEWTABLE */
+  ,opmode(0, 1, OpArgR, OpArgK, iABC)		/* OP_SELF */
+- ,opmode(0, 1, OpArgK, OpArgK, iABC)		/* OP_ADD */
+- ,opmode(0, 1, OpArgK, OpArgK, iABC)		/* OP_SUB */
+- ,opmode(0, 1, OpArgK, OpArgK, iABC)		/* OP_MUL */
++ ,opmode(0, 1, OpArgR, OpArgN, iABC)		/* OP_LOADNIL */
++ ,opmode(0, 1, OpArgK, OpArgN, iABx)		/* OP_LOADK */
++ ,opmode(0, 1, OpArgU, OpArgU, iABC)		/* OP_LOADBOOL */
++ ,opmode(0, 1, OpArgU, OpArgN, iABC)		/* OP_GETUPVAL */
++ ,opmode(1, 0, OpArgK, OpArgK, iABC)		/* OP_LT */
++ ,opmode(1, 0, OpArgK, OpArgK, iABC)		/* OP_LE */
++ ,opmode(1, 0, OpArgK, OpArgK, iABC)		/* OP_EQ */
+  ,opmode(0, 1, OpArgK, OpArgK, iABC)		/* OP_DIV */
++ ,opmode(0, 1, OpArgK, OpArgK, iABC)		/* OP_MUL */
++ ,opmode(0, 1, OpArgK, OpArgK, iABC)		/* OP_SUB */
++ ,opmode(0, 1, OpArgK, OpArgK, iABC)		/* OP_ADD */
+  ,opmode(0, 1, OpArgK, OpArgK, iABC)		/* OP_MOD */
+  ,opmode(0, 1, OpArgK, OpArgK, iABC)		/* OP_POW */
+  ,opmode(0, 1, OpArgR, OpArgN, iABC)		/* OP_UNM */
+@@ -83,20 +85,18 @@
+  ,opmode(0, 1, OpArgR, OpArgN, iABC)		/* OP_LEN */
+  ,opmode(0, 1, OpArgR, OpArgR, iABC)		/* OP_CONCAT */
+  ,opmode(0, 0, OpArgR, OpArgN, iAsBx)		/* OP_JMP */
+- ,opmode(1, 0, OpArgK, OpArgK, iABC)		/* OP_EQ */
+- ,opmode(1, 0, OpArgK, OpArgK, iABC)		/* OP_LT */
+- ,opmode(1, 0, OpArgK, OpArgK, iABC)		/* OP_LE */
+  ,opmode(1, 1, OpArgR, OpArgU, iABC)		/* OP_TEST */
+  ,opmode(1, 1, OpArgR, OpArgU, iABC)		/* OP_TESTSET */
+- ,opmode(0, 1, OpArgU, OpArgU, iABC)		/* OP_CALL */
+- ,opmode(0, 1, OpArgU, OpArgU, iABC)		/* OP_TAILCALL */
+- ,opmode(0, 0, OpArgU, OpArgN, iABC)		/* OP_RETURN */
++ ,opmode(0, 1, OpArgR, OpArgN, iABC) 		/* OP_MOVE */
+  ,opmode(0, 1, OpArgR, OpArgN, iAsBx)		/* OP_FORLOOP */
+  ,opmode(0, 1, OpArgR, OpArgN, iAsBx)		/* OP_FORPREP */
+  ,opmode(1, 0, OpArgN, OpArgU, iABC)		/* OP_TFORLOOP */
+  ,opmode(0, 0, OpArgU, OpArgU, iABC)		/* OP_SETLIST */
+  ,opmode(0, 0, OpArgN, OpArgN, iABC)		/* OP_CLOSE */
+  ,opmode(0, 1, OpArgU, OpArgN, iABx)		/* OP_CLOSURE */
++ ,opmode(0, 1, OpArgU, OpArgU, iABC)		/* OP_CALL */
++ ,opmode(0, 0, OpArgU, OpArgN, iABC)		/* OP_RETURN */
++ ,opmode(0, 1, OpArgU, OpArgU, iABC)		/* OP_TAILCALL */
+  ,opmode(0, 1, OpArgU, OpArgN, iABC)		/* OP_VARARG */
+ };
+ 
+--- a/src/ltm.h	2019-03-17 13:19:41.483090194 -0500
++++ b/src/ltm.h	2016-12-26 20:20:39.000000000 -0600
+@@ -16,23 +16,23 @@
+ * grep "ORDER TM"
+ */
+ typedef enum {
+-  TM_INDEX,
++  TM_MODE,
+   TM_NEWINDEX,
++  TM_INDEX,
+   TM_GC,
+-  TM_MODE,
+   TM_EQ,  /* last tag method with `fast' access */
+-  TM_ADD,
+-  TM_SUB,
+-  TM_MUL,
+   TM_DIV,
++  TM_MUL,
+   TM_MOD,
+   TM_POW,
++  TM_LE,
++  TM_LT,
+   TM_UNM,
+   TM_LEN,
+-  TM_LT,
+-  TM_LE,
+-  TM_CONCAT,
++  TM_SUB,
++  TM_ADD,
+   TM_CALL,
++  TM_CONCAT,
+   TM_N		/* number of elements in the enum */
+ } TMS;
+ 
+--- a/src/lparser.c	2019-03-17 13:21:23.762536099 -0500
++++ b/src/lparser.c	2016-12-26 20:20:39.000000000 -0600
+@@ -822,11 +822,13 @@
+   lu_byte left;  /* left priority for each binary operator */
+   lu_byte right; /* right priority */
+ } priority[] = {  /* ORDER OPR */
+-   {6, 6}, {6, 6}, {7, 7}, {7, 7}, {7, 7},  /* `+' `-' `/' `%' */
+-   {10, 9}, {5, 4},                 /* power and concat (right associative) */
+-   {3, 3}, {3, 3},                  /* equality and inequality */
+-   {3, 3}, {3, 3}, {3, 3}, {3, 3},  /* order */
+-   {2, 2}, {1, 1}                   /* logical (and/or) */
++   {7, 7}, {7, 7}, {7, 7}, /* '%' '*' '/' */
++   {10, 9},                /* power (right associative) */
++   {6, 6}, {6, 6},         /* '-' '+' */
++   {3, 3}, {3, 3},         /* inequality and equality */
++   {5, 4},                 /* concat (right associative) */
++   {2, 2}, {1, 1},                  /* logical (and/or) */
++   {3, 3}, {3, 3}, {3, 3}, {3, 3}   /* order */
+ };
+ 
+ #define UNARY_PRIORITY	8  /* priority for unary operators */
+--- a/src/llex.c	2019-03-17 13:21:23.759202783 -0500
++++ b/src/llex.c	2016-12-26 20:20:39.000000000 -0600
+@@ -36,12 +36,12 @@
+ 
+ /* ORDER RESERVED */
+ static const char *const luaX_tokens [] = {
+-    "and", "break", "do", "else", "elseif",
+-    "end", "false", "for", "function", "if",
+-    "in", "local", "nil", "not", "or", "repeat",
+-    "return", "then", "true", "until", "while",
+-    "..", "...", "==", ">=", "<=", "~=",
+-    "<number>", "<name>", "<string>", "<eof>",
++    "do", "end", "break", "elseif", "for",
++    "function", "if", "else", "in", "local",
++    "nil", "not", "or", "and", "while", "then",
++    "false", "true", "repeat", "until", "return",
++    "...", "<=", ">=", "==", "~=",
++    "<number>", "..", "<string>", "<eof>", "<name>",
+     "<integer>",
+ #ifdef LNUM_COMPLEX
+     "<number2>",
+--- a/src/llex.h	2019-03-17 13:21:23.759202783 -0500
++++ b/src/llex.h	2016-12-26 20:20:39.000000000 -0600
+@@ -23,20 +23,20 @@
+ */
+ enum RESERVED {
+   /* terminal symbols denoted by reserved words */
+-  TK_AND = FIRST_RESERVED, TK_BREAK,
+-  TK_DO, TK_ELSE, TK_ELSEIF, TK_END, TK_FALSE, TK_FOR, TK_FUNCTION,
+-  TK_IF, TK_IN, TK_LOCAL, TK_NIL, TK_NOT, TK_OR, TK_REPEAT,
+-  TK_RETURN, TK_THEN, TK_TRUE, TK_UNTIL, TK_WHILE,
++  TK_DO = FIRST_RESERVED, TK_END,
++  TK_BREAK, TK_ELSEIF, TK_FOR, TK_FUNCTION, TK_IF, TK_ELSE, TK_IN,
++  TK_LOCAL, TK_NIL, TK_NOT, TK_OR, TK_AND, TK_WHILE, TK_THEN,
++  TK_FALSE, TK_TRUE, TK_REPEAT, TK_UNTIL, TK_RETURN,
+   /* other terminal symbols */
+-  TK_CONCAT, TK_DOTS, TK_EQ, TK_GE, TK_LE, TK_NE, TK_NUMBER,
+-  TK_NAME, TK_STRING, TK_EOS, TK_INT
++  TK_DOTS, TK_LE, TK_GE, TK_EQ, TK_NE, TK_NUMBER, TK_CONCAT,
++  TK_STRING, TK_EOS, TK_NAME, TK_INT
+ #ifdef LNUM_COMPLEX
+   , TK_NUMBER2   /* imaginary constants: Ni */ 
+ #endif
+ };
+ 
+ /* number of reserved words */
+-#define NUM_RESERVED	(cast(int, TK_WHILE-FIRST_RESERVED+1))
++#define NUM_RESERVED	(cast(int, TK_RETURN-FIRST_RESERVED+1))
+ 
+ 
+ /* SemInfo is a local data structure of 'llex.c', used for carrying a string
+--- a/src/lcode.h	2019-03-17 13:21:23.755869468 -0500
++++ b/src/lcode.h	2016-12-26 20:20:39.000000000 -0600
+@@ -24,16 +24,16 @@
+ ** grep "ORDER OPR" if you change these enums
+ */
+ typedef enum BinOpr {
+-  OPR_ADD, OPR_SUB, OPR_MUL, OPR_DIV, OPR_MOD, OPR_POW,
+-  OPR_CONCAT,
++  OPR_MOD, OPR_MUL, OPR_DIV, OPR_POW, OPR_SUB, OPR_ADD,
+   OPR_NE, OPR_EQ,
+-  OPR_LT, OPR_LE, OPR_GT, OPR_GE,
++  OPR_CONCAT,
+   OPR_AND, OPR_OR,
++  OPR_LT, OPR_LE, OPR_GT, OPR_GE,
+   OPR_NOBINOPR
+ } BinOpr;
+ 
+ 
+-typedef enum UnOpr { OPR_MINUS, OPR_NOT, OPR_LEN, OPR_NOUNOPR } UnOpr;
++typedef enum UnOpr { OPR_NOT, OPR_MINUS, OPR_LEN, OPR_NOUNOPR } UnOpr;
+ 
+ 
+ #define getcode(fs,e)	((fs)->f->code[(e)->u.s.info])
