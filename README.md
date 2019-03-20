@@ -6,6 +6,9 @@ This repository details how to install OpenWrt on a TP-Link Archer C900 (US). I'
 ### Disclaimer
 I'm not responsible for turning your router into a toaster. You're following these instructions of your own accord. These instructions are not for the faint of heart -- they are geared towards guiding fairly technical users. If you don't understand what you're doing when you run these commands or tools, you probably shouldn't be attempting this.
 
+### Prerequisites
+This guide assumes you're running Linux and that you have a Go installation. Having a copy of fish shell is recommended, but not required -- you can call the go tool yourself.
+
 ### Background
 On relatively recent devices (including the Archer C900) TP-Link seems to have implemented some kind of firmware verification scheme that prevents the installation of third-party firmware. Curiously, The Archer C2 v3, the EU region equivalent of the C900, seems to have no such protection, even though the two devices are practically identical in terms of hardware.
 
