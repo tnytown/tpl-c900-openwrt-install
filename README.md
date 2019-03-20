@@ -65,6 +65,7 @@ mtd3: 006a0000 00010000 "rootfs"
 mtd4: 00010000 00010000 "ART"
 ```
 If your partition layout is any different, **do not continue**.
+
 6. Flash the image with `mtd write /tmp/openwrt-ath79-generic-tplink_archer-c2-v3-squashfs-sysupgrade.bin mtd2:mtd3`. **Verify that mtd2 and mtd3 correspond with kernel and rootfs, respectively**. This overwrites the stock kernel and rootfs with the OpenWrt image. OpenWrt's partitioning is different than stock, but that doesn't really matter -- there really isn't a partition table on this specific device, it's hardcoded into the kernel. As far as I understand it, as long as the offset that u-boot boots from is the same, the new kernel will boot and understand the partition layout and everyone will be happy.
 7. Once the `mtd` command finishes, type `reboot` to reboot the router.
 8. Profit! The router should now be running OpenWrt. Be patient, first boot takes a while. If something went wrong while flashing, you can attempt TFTP recovery (the U-Boot partition shouldn't have been touched.) Remember that you've flashed a snapshot image, so you'll have to install LuCi manually.
