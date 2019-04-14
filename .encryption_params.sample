@@ -1,2 +1,2 @@
-set -x KEY ""
-set -x IV ""
+export KEY=""
+export IV=""
