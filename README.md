@@ -7,7 +7,7 @@ This repository details how to install OpenWrt on a TP-Link Archer C900 (US). I'
 I'm not responsible for turning your router into a toaster. You're following these instructions of your own accord. These instructions are not for the faint of heart -- they are geared towards guiding fairly technical users. If you don't understand what you're doing when you run these commands or tools, you probably shouldn't be attempting this.
 
 ### Prerequisites
-This guide assumes you're running Linux and that you have a Go installation. Having a copy of fish shell is recommended, but not required -- you can call the go tool yourself.
+This guide assumes you're running Linux and that you have a Go installation.
 
 ### Background
 On relatively recent devices (including the Archer C900) TP-Link seems to have implemented some kind of firmware verification scheme that prevents the installation of third-party firmware. Curiously, The Archer C2 v3, the EU region equivalent of the C900, seems to have no such protection, even though the two devices are practically identical in terms of hardware.
@@ -34,7 +34,7 @@ This should decompress the filesystem into `./squashfs-root`.
 
 ##### Modification
 You should download the backup file from the router (the page to do so should be in System Tools -> Backup and Restore). These instructions will assume that you have the backup in this directory that the tools are in with a name of `backup.bin`.
-1. Run `extract.fish`. If you don't have fish shell, take a look at the script to see how to follow the steps manually, it's pretty self-explanatory.
+1. Run `extract.sh`.
 2. The decrypted config file should now be `data/config.xml`. There should be a section in the file that looks something like this:
 ```xml
 <dropbear name="dropbear">
@@ -45,7 +45,7 @@ You should download the backup file from the router (the page to do so should be
 </dropbear>
 ```
 3. Modify the dropbear section. Somewhere between the opening and closing tags, add the RemoteSSH tag: `<RemoteSSH>on</RemoteSSH>`. Admire your handiwork and save the file.
-4. Run `package.fish`. You should how have a `backup_final.bin` file.
+4. Run `package.sh`. You should how have a `backup_final.bin` file.
 5. Restore the router using `backup_final.bin`, on the same page that you used to download the backup. Needless to say, don't turn off your router. It should reboot normally.
 
 ##### Flashing
