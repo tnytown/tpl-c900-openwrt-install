@@ -45,7 +45,7 @@ You should download the backup file from the router (the page to do so should be
 </dropbear>
 ```
 3. Modify the dropbear section. Somewhere between the opening and closing tags, add the RemoteSSH tag: `<RemoteSSH>on</RemoteSSH>`. Admire your handiwork and save the file.
-4. Run `package.sh`. You should how have a `backup_final.bin` file.
+4. Run `package.sh`. You should now have a `backup_final.bin` file.
 5. Restore the router using `backup_final.bin`, on the same page that you used to download the backup. Needless to say, don't turn off your router. It should reboot normally.
 
 ##### Flashing
