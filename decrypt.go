@@ -61,24 +61,30 @@ func main() {
 	}
 }
 
-func decrypt(key, iv, in, out []byte) (err error) {
+func decrypt(key, iv, in, out []byte) error {
 		block, err := aes.NewCipher(key)
+		if err != nil {
+			return err
+		}
 		stream := cipher.NewCBCDecrypter(block, iv)
 
 		stream.CryptBlocks(out, in)
 
-		return
+		return nil
 }
 
-func encrypt(key, iv, in, out []byte) (err error) {
+func encrypt(key, iv, in, out []byte) error {
 		block, err := aes.NewCipher(key)
+		if err != nil {
+			return err
+		}
 		stream := cipher.NewCBCEncrypter(block, iv)
 		stream.CryptBlocks(out, in)
 
-		return
+		return nil
 }
 
-func decompress(in io.Reader, out io.Writer) (err error) {
+func decompress(in io.Reader, out io.Writer) error {
 	dcmp, err := zlib.NewReader(in)
 	if err != nil {
 		return err
@@ -91,19 +97,19 @@ func decompress(in io.Reader, out io.Writer) (err error) {
 		return err
 	}
 
-	return
+	return nil
 }
 
-func compress(in io.Reader, out io.Writer) (err error) {
+func compress(in io.Reader, out io.Writer) error {
 	cmp := zlib.NewWriter(out)
 	defer cmp.Close()
 
-	_, err = io.Copy(cmp, in)
+	_, err := io.Copy(cmp, in)
 	if err != nil {
 		return err
 	}
 
-	return
+	return nil
 }
 
 func log(s string, v ...interface{}) {
