@@ -1,0 +1,11 @@
+{
+  inputs.nixpkgs.url = "nixpkgs/release-21.05";
+  outputs = { self, nixpkgs }: let
+    system = "x86_64-linux";
+    pkgs = nixpkgs.legacyPackages.${system};
+  in {
+    devShell.${system} = pkgs.mkShell {
+      buildInputs = [ pkgs.go ];
+    };
+  };
+}
