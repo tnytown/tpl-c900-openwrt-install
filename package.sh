@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euf -o pipefail
+
 UTIL=$(find `dirname $(pwd)` -name decrypt.go)
 source .encryption_params
 
