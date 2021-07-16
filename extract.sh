@@ -1,19 +1,7 @@
 #!/usr/bin/env bash
 
 set -euf -o pipefail
-
-UTIL=$(find `dirname $(pwd)` -name decrypt.go)
-source .encryption_params
-
-u() {
-  c go run $UTIL $@
-}
-
-c() {
-  echo "[-]" $@
-  eval $@
-}
-
+source common.sh
 
 u -in backup.bin -out backup.zz.tmp dec
 u -in backup.zz.tmp -out backup.bin.tmp dmp

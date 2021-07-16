@@ -1,18 +1,7 @@
 #!/usr/bin/env bash
 
 set -euf -o pipefail
-
-UTIL=$(find `dirname $(pwd)` -name decrypt.go)
-source .encryption_params
-
-u() {
-  go run $UTIL $@
-}
-
-c() {
-  echo "[-]" $@
-  eval $@
-}
+source common.sh
 
 c pushd data
 u -in config.xml -out config.zz.tmp cmp
