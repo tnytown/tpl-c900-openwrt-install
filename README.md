@@ -106,8 +106,7 @@ get to a prompt. If not, something went wrong along the way.
    following steps.
 3. Check the checksum of the file against the one posted on the download site.
 4. In another terminal, upload the sysupgrade image to your router: `cat
-openwrt-ath79-generic-tplink_archer-c2-v3-squashfs-sysupgrade.bin | ssh root@<router_ip> 'cat
->/tmp/firmware.bin'`.  The image is now uploaded to /tmp/, in RAM.
+openwrt-ath79-generic-tplink_archer-c2-v3-squashfs-sysupgrade.bin | ssh root@<router_ip> 'cat >/tmp/firmware.bin'`.  The image is now uploaded to /tmp/, in RAM.
 5. Going back the router shell, run `cat /proc/mtd`. Your output should be similar to this:
 
 ```
