@@ -5,7 +5,7 @@
     pkgs = nixpkgs.legacyPackages.${system};
   in {
     devShell.${system} = pkgs.mkShell {
-      buildInputs = [ pkgs.go ];
+      buildInputs = [ pkgs.go pkgs.squashfsTools ];
     };
   };
 }
